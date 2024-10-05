@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Songs</title>
+</head>
+
+<body>
+    <h1>Rate Your Favorite Songs</h1>
+
+    {% if current_song_info %}
+    <h2>Now Playing: {{ current_song_info.track_name }} by {{ current_song_info.artist_name }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="song" value="{{ current_song_info.song.id }}">
+
+        <label for="rating">Rate this song:</label>
+        <input type="range" name="rating" id="rating" min="1" max="10" step="1" value="5">
+        <span id="ratingValue">5</span>
+
+        <button type="submit">Submit Rating</button>
+    </form>
+
+    <script>
+        // Update the displayed rating value when the slider changes
+        const slider = document.getElementById('rating');
+        const ratingValue = document.getElementById('ratingValue');
+
+        slider.oninput = function () {
+            ratingValue.textContent = this.value;
+        }
+    </script>
+
+    {% else %}
+    <p>No song is currently playing on your Spotify account.</p>
+    {% endif %}
+
+    <h2>Available Songs</h2>
+    <ul>
+        {% for song in songs %}
+        <li>{{ song.title }} by {{ song.artist }}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
