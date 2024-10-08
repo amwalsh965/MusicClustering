@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rate Songs</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 
 <body>
     <h1>Rate Your Favorite Songs</h1>
 
     {% if current_song_info %}
-    <h2>Now Playing: {{ current_song_info.track_name }} by {{ current_song_info.artist_name }}</h2>
+    <h2 id="song-title">Now Playing: {{ current_song_info.track_name }} by {{ current_song_info.artist_name }}</h2>
 
     <form method="POST">
         {% csrf_token %}
@@ -23,6 +25,20 @@
 
         <button type="submit">Submit Rating</button>
     </form>
+    {% else %}
+    <h2 id="song-title"></h2>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="song" value="">
+
+        <label for="rating">Rate this song:</label>
+        <input type="range" name="rating" id="rating" min="1" max="10" step="1" value="5">
+        <span id="ratingValue">5</span>
+
+        <button type="submit">Submit Rating</button>
+    </form>
+    <p>No song is currently playing on your Spotify account.</p>
+    {% endif %}
 
     <script>
         // Update the displayed rating value when the slider changes
@@ -32,18 +48,74 @@
         slider.oninput = function () {
             ratingValue.textContent = this.value;
         }
+
     </script>
+    <script>
+        let RatingInProgress = false
 
-    {% else %}
-    <p>No song is currently playing on your Spotify account.</p>
-    {% endif %}
+        document.addEventListener('DOMContentLoaded', () => {
+            const songTitleElement = document.getElementById('song-title');
 
-    <h2>Available Songs</h2>
-    <ul>
-        {% for song in songs %}
-        <li>{{ song.title }} by {{ song.artist }}</li>
-        {% endfor %}
-    </ul>
+            function fetchSongInfo() {
+                if (RatingInProgress) {
+                    return; // Exit if the rate function is currently processing
+                }
+                axios.get("/", {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        console.log("axios running")
+                        const songInfo = response.data;
+
+                        // Update song title and info elements with the new song data
+                        console.log("afjlkakldsfskl ", songInfo.track_name)
+                        if (songInfo.track_name === undefined || songInfo.artist_name === undefined)
+                            songTitleElement.textContent = 'No song currently playing';
+                        else
+                            songTitleElement.textContent = `Now Playing: ${songInfo.track_name} by ${songInfo.artist_name}`;
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        songTitleElement.textContent = 'No song currently playing';
+                    });
+            }
+
+            fetchSongInfo()
+
+
+            // Set an interval to fetch the song info every 5 seconds
+            setInterval(fetchSongInfo, 5000);
+
+
+            const ratingForm = document.querySelector('form');
+            ratingForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                RatingInProgress = true;
+
+                const formData = new FormData(ratingForm);
+                const data = Object.fromEntries(formData);
+                data.action = 'rate_song'
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
+
+                axios.post("/", data)
+                    .then(response => {
+                    })
+                    .catch(error => {
+                        console.error("Error submitting rating:", error);
+                    })
+                    .finally(() => {
+                        // Reset the flag when done
+                        RatingInProgress = false;
+                    });
+            });
+        });
+    </script>
 </body>
 
 </html>
