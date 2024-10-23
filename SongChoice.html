@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<!-- This is the page where the user rates the song -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Song Rating</title>
+    <style>
+      /* Global styles */
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: black;
+        color: rgb(0, 128, 0);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      /* Menu bar styling */
+      nav {
+        width: 100%;
+        background-color: #333;
+        overflow: hidden;
+      }
+
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      nav ul li {
+        margin: 0;
+      }
+
+      nav ul li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 20px;
+        text-decoration: none;
+      }
+
+      nav ul li a:hover {
+        background-color: #555;
+      }
+
+      /* Container for centering the content */
+      .container {
+        max-width: 800px;
+        margin: 20px;
+        padding: 20px;
+        background-color: #222;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.5);
+      }
+
+      /* Flexbox layout for image and heading */
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      /* Styles for the image */
+      .header img {
+        width: 200px;
+        height: auto;
+        margin-right: 20px;
+        border-radius: 10px;
+      }
+
+      /* Styling the heading */
+      .header h1 {
+        font-size: 2rem;
+        margin: 0;
+        color: rgb(23, 255, 23);
+      }
+
+      /* Style for the current song info */
+      h2 {
+        margin-top: 0;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+
+      /* Form styling */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #333;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 5px rgba(0, 255, 0, 0.2);
+      }
+
+      label {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: rgb(23, 255, 23);
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 10px;
+        background: green;
+        outline: none;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      /* Slider thumb */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        background: white;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+
+      /* Submit button styling */
+      button[type="submit"] {
+        background-color: green;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-transform: uppercase;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+
+      button[type="submit"]:hover {
+        background-color: rgb(23, 255, 23);
+      }
+
+      /* Responsive styling */
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .header img {
+          margin-right: 0;
+          margin-bottom: 10px;
+        }
+
+        nav ul {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation bar -->
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#rate">Rate Song</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <div class="header">
+        <img src="images/Spotifyimg.jpeg" alt="Spotify banner" />
+        <h1>Rate Your Favorite Songs</h1>
+      </div>
+
+      {% if current_song_info %}
+      <h2 id="song-title">
+        Now Playing: {{ current_song_info.track_name }} by {{
+        current_song_info.artist_name }}
+      </h2>
+      <form method="POST">
+        {% csrf_token %}
+        <input
+          type="hidden"
+          name="song"
+          value="{{ current_song_info.song.id }}"
+        />
+
+        <label for="rating">Rate this song:</label>
+        <input
+          type="range"
+          name="rating"
+          id="rating"
+          min="1"
+          max="10"
+          step="1"
+          value="5"
+        />
+        <span id="ratingValue">5</span>
+
+        <button type="submit">Submit Rating</button>
+      </form>
+      {% else %}
+      <h2 id="song-title">No song currently playing.</h2>
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="song" value="" />
+
+        <label for="rating">Rate this song:</label>
+        <input
+          type="range"
+          name="rating"
+          id="rating"
+          min="1"
+          max="10"
+          step="1"
+          value="5"
+        />
+        <span id="ratingValue">5</span>
+
+        <button type="submit">Submit Rating</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <script>
+      // Update the displayed rating value when the slider changes
+      const slider = document.getElementById("rating");
+      const ratingValue = document.getElementById("ratingValue");
+
+      slider.oninput = function () {
+        ratingValue.textContent = this.value;
+      };
+
+      let RatingInProgress = false;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const songTitleElement = document.getElementById("song-title");
+
+        function fetchSongInfo() {
+          if (RatingInProgress) {
+            return; // Exit if the rate function is currently processing
+          }
+          axios
+            .get("/", {
+              headers: {
+                "X-Requested-With": "XMLHttpRequest",
+              },
+            })
+            .then((response) => {
+              const songInfo = response.data;
+
+              if (
+                songInfo.track_name === undefined ||
+                songInfo.artist_name === undefined
+              ) {
+                songTitleElement.textContent = "No song currently playing";
+              } else {
+                songTitleElement.textContent = `Now Playing: ${songInfo.track_name} by ${songInfo.artist_name}`;
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+              songTitleElement.textContent = "No song currently playing";
+            });
+        }
+
+        fetchSongInfo();
+
+        // Set an interval to fetch the song info every 5 seconds
+        setInterval(fetchSongInfo, 5000);
+
+        const ratingForm = document.querySelector("form");
+        ratingForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          RatingInProgress = true;
+
+          const formData = new FormData(ratingForm);
+          const data = Object.fromEntries(formData);
+          data.action = "rate_song";
+
+          const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+          axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
+
+          axios
+            .post("/", data)
+            .then((response) => {
+              console.log("Rating submitted");
+            })
+            .catch((error) => {
+              console.error("Error submitting rating:", error);
+            })
+            .finally(() => {
+              // Reset the flag when done
+              RatingInProgress = false;
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

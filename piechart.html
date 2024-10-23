@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Preferences and Table</title>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #222; /* Updated background color */
+        color: #13a813; /* Green text */
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Menu bar styling */
+      nav {
+        width: 100%;
+        background-color: #333;
+        overflow: hidden;
+      }
+
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      nav ul li {
+        margin: 0;
+      }
+
+      nav ul li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 20px;
+        text-decoration: none;
+      }
+
+      nav ul li a:hover {
+        background-color: #555;
+      }
+
+      table {
+        font-family: "Roboto", sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        color: #13a813; /* Green text for table */
+        margin-top: 20px;
+      }
+
+      td,
+      th {
+        border: 1px solid #13a813;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: rgba(
+          19,
+          168,
+          19,
+          0.1
+        ); /* Slightly green background for even rows */
+      }
+
+      h2 {
+        margin-top: 20px;
+        text-align: center;
+        color: #13a813;
+      }
+    </style>
+
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <script type="text/javascript">
+      google.charts.load("current", { packages: ["corechart"] });
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ["Task", "Hours per Day"],
+          ["Rock", 10],
+          ["Rap", 10],
+          ["Pop", 10],
+          ["Country", 10],
+        ]);
+
+        var options = {
+          title: "Music Genre Preferences",
+          titleTextStyle: {
+            color: "#13a813", // Green title text
+            fontSize: 18,
+          },
+          backgroundColor: "#222222", // Updated background color for the chart to match
+          legendTextStyle: { color: "#13a813" }, // Green legend text
+          pieSliceBorderColor: "#13a813", // Green border around pie slices
+          pieSliceTextStyle: {
+            color: "#FFFFFF", // White text on pie slices
+          },
+        };
+
+        var chart = new google.visualization.PieChart(
+          document.getElementById("piechart")
+        );
+
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Navigation bar -->
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#table">Music Table</a></li>
+        <li><a href="#chart">Preferences Chart</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+
+    <h2 id="table">Music Table</h2>
+    <table>
+      <tr>
+        <th>Artist</th>
+        <th>Genre</th>
+        <th>Rating</th>
+      </tr>
+      <tr>
+        <td>Alfreds Futterkiste</td>
+        <td>Maria Anders</td>
+        <td>Germany</td>
+      </tr>
+      <tr>
+        <td>Centro comercial Moctezuma</td>
+        <td>Francisco Chang</td>
+        <td>Mexico</td>
+      </tr>
+      <tr>
+        <td>Ernst Handel</td>
+        <td>Roland Mendel</td>
+        <td>Austria</td>
+      </tr>
+      <tr>
+        <td>Island Trading</td>
+        <td>Helen Bennett</td>
+        <td>UK</td>
+      </tr>
+      <tr>
+        <td>Laughing Bacchus Winecellars</td>
+        <td>Yoshi Tannamuri</td>
+        <td>Canada</td>
+      </tr>
+      <tr>
+        <td>Magazzini Alimentari Riuniti</td>
+        <td>Giovanni Rovelli</td>
+        <td>Italy</td>
+      </tr>
+    </table>
+
+    <div
+      id="piechart"
+      style="width: 900px; height: 500px; margin-top: 20px"
+      aria-label="Music Preferences Chart"
+    ></div>
+  </body>
+</html>
