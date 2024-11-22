@@ -1,0 +1,232 @@
+/* Global styles */
+body {
+    font-family: "Roboto", sans-serif;
+    background-color: black;
+    color: #1FD860;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.main-title {
+    font-size: 30 px;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+/* Menu bar styling */
+nav {
+    width: 100%;
+    background-color: #333;
+    overflow: hidden;
+
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+nav ul li {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+nav ul li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 20px;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+/* Container for centering the content */
+.container {
+    max-width: 1200px;
+    /* Wider max width */
+    margin-top: 80px;
+    /* Space for fixed navbar */
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #1FD860;
+    width: 90%;
+    /* Ensures it spans almost full width on larger screens */
+}
+
+/* Flexbox layout for image and heading */
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Styles for the image */
+header nav ul img {
+    width: 200px;
+    height: auto;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+
+/* Styling the heading */
+.header h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: #1FD860;
+}
+
+/* Style for the current song info */
+h2 {
+    margin-top: 0;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 255, 0, 0.2);
+}
+
+label {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: white;
+    font-weight: 600;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: #1FD860;
+    outline: none;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+/* Slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: white;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* Submit button styling */
+button[type="submit"] {
+    background-color: #1FD860;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+button[type="submit"]:hover {
+    border: 1px solid white;
+    margin-top: 8.5px;
+}
+
+button[type="submit"]:active {
+    background-color: purple;
+}
+
+footer {
+    position: absolute;
+    bottom: 2%
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header img {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    nav ul {
+        flex-direction: column;
+    }
+
+    .container {
+        width: 95%;
+        /* Slightly narrower on small screens */
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        width: 80%;
+    }
+}
+
+@media (min-width: 1500px) {
+    .container {
+        width: 70%;
+    }
+}
+
+
+/* home styles */
+
+#home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+}
+
+.home-grid-item {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    width: 100%;
+}
+
+#top-recommendations {
+    grid-column: 1 / 2;
+}
+
+#top-genres {
+    grid-column: 2 / 3;
+}
+
+.home-header {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+}

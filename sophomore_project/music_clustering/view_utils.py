@@ -1,77 +1,150 @@
-from models import Song, Rating, User
-import numpy as np
+import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-
-# Sample data: Rows represent users, columns represent genre preferences (ratings from 1 to 10)
-user_data = np.array(
-    [
-        [8, 2, 5, 6, 7],  # User 1: Prefers pop, dislikes metal, average for others
-        [7, 3, 6, 8, 6],  # User 2: Likes pop and rock
-        [1, 9, 2, 1, 2],  # User 3: Dislikes pop, prefers metal
-        [2, 10, 1, 2, 1],  # User 4: Heavy metal fan
-        [6, 3, 7, 6, 5],  # User 5: Balanced tastes
-    ]
-)
-
-# Assume we want to cluster users into 2 groups (you can adjust the number of clusters)
-num_clusters = 2
-
-# Normalize the data to ensure all genres are weighted equally
-scaler = StandardScaler()
-scaled_data = scaler.fit_transform(user_data)
-
-# Apply K-means clustering
-kmeans = KMeans(n_clusters=num_clusters, random_state=0)
-kmeans.fit(scaled_data)
-
-# Get the cluster assignments for each user
-user_clusters = kmeans.labels_
-
-# Define some example songs that belong to different genres (same order as genres in user data)
-songs = {
-    "pop": ["Song A", "Song B", "Song C"],
-    "metal": ["Song D", "Song E", "Song F"],
-    "jazz": ["Song G", "Song H", "Song I"],
-    "rock": ["Song J", "Song K", "Song L"],
-    "hip-hop": ["Song M", "Song N", "Song O"],
-}
+from sklearn.metrics import pairwise_distances_argmin_min
+from .models import Song, Rating, Genre, User
 
 
-# Recommend songs to a new user based on their cluster
-def recommend_songs(new_user_ratings):
-    # Normalize new user input
-    scaled_new_user = scaler.transform([new_user_ratings])
+# For clustering Un-rated Music
+def cluster_unrated(genre):
+    songs = Song.objects.all().values(
+        "id", "popularity", "valence", "tempo", "danceability", "energy"
+    )
+    song_data = pd.DataFrame(songs).dropna()
 
-    # Predict the cluster for the new user
-    cluster = kmeans.predict(scaled_new_user)[0]
+    scaler = StandardScaler()
+    scaled_song_data = scaler.fit_transform(
+        song_data[["popularity", "valence", "tempo", "danceability", "energy"]]
+    )
 
-    print(f"New user assigned to cluster: {cluster}")
+    kmeans = KMeans(n_clusters=10, random_state=42)
+    kmeans.fit(scaled_song_data)
 
-    # Based on the cluster, recommend top songs from the most preferred genre
-    # For simplicity, we recommend songs from the user's top-rated genres
-    top_genre_index = np.argmax(new_user_ratings)
-    genre_list = list(songs.keys())
-    recommended_genre = genre_list[top_genre_index]
+    song_data["cluster"] = kmeans.labels_
 
-    print(f"Based on your preferences, we recommend these {recommended_genre} songs:")
-    for song in songs[recommended_genre]:
-        print(f"- {song}")
-
-
-# Example: New user rating input
-new_user = [7, 3, 6, 8, 5]  # New user likes pop, rock, and hip-hop
-recommend_songs(new_user)
+    for index, row in song_data.iterrows():
+        Song.objects.filter(id=row["id"]).update(cluster=row["cluster"])
 
 
-def rate_song():
-    pass
+def cluster_all_unrated(num_genres):
+
+    genres = {}
+    for song in Song.objects.all():
+        song: Song
+        if song.genres.name in genres:
+            genres[song.genres.name] += 1
+        else:
+            genres[song.genres.name] = 1
+
+    sorted_genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
+
+    top_genres = []
+    sorted_genre_keys = sorted_genres.keys
+    for i in range(0, num_genres):
+        top_genres.append(sorted_genre_keys[i])
+
+    for top_genre in top_genres:
+        cluster_all_unrated(top_genre)
 
 
-def spotify(user_name, track_name):
-    try:
-        song = Song.objects.get(title=track_name)
-    except Song.DoesNotExist as e:
-        song = Song.objects.create(title=track_name)
+# For clustering rated music
+def get_top_genres(num_genres, ratings):
+    songs = []
+    for rating in ratings:
+        songs.append(rating.song)
+    genres = {}
+    for song in songs:
+        song: Song
+        if song.genres.name in genres:
+            genres[song.genres.name] += 1
+        else:
+            genres[song.genres.name] = 1
 
-    user = User.objects.get(user_name=user_name)
+    sorted_genres = dict(sorted(genres.items(), key=lambda item: item[1], reverse=True))
+
+    top_genres = []
+    sorted_genre_keys = sorted_genres.keys
+    for i in range(0, num_genres):
+        top_genres.append(sorted_genre_keys[i])
+
+    return top_genres
+
+
+def get_song_features(user, genre, ratings):
+    songs = []
+    for rating in ratings:
+        songs.append(rating.song)
+
+    sorted_songs = []
+    for song in songs:
+        song: Song
+        if song.genres.name is genre:
+            sorted_songs.append(song)
+    song_data = []
+
+    for song in sorted_songs:
+        song_data.append(
+            [
+                song.popularity,
+                song.valence,
+                song.tempo,
+                song.danceability,
+                song.energy,
+                song.key,
+                song.speechiness,
+                song.acousticness,
+                song.instrumentalness,
+                song.liveness,
+            ]
+        )
+
+    df = pd.DataFrame(
+        song_data,
+        columns=[
+            "popularity",
+            "valence",
+            "tempo",
+            "danceability",
+            "energy",
+            "key",
+            "speechiness",
+            "acousticness",
+            "instrumentalness",
+            "liveness",
+        ],
+    )
+
+    return df
+
+
+def preprocess_data(df):
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(df)
+    return scaled_data
+
+
+def apply_kmeans(df, k=10):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    clusters = kmeans.fit_predict(df)
+    return clusters, kmeans
+
+
+def recommend_songs(user: User, genre):
+    user_ratings = Rating.objects.filter(user=user)
+    # Get the song features and assign clusters
+    df = get_song_features(user, genre)
+    scaled_data = preprocess_data(df)
+    clusters, kmeans = apply_kmeans(scaled_data)
+
+    # Find the closest cluster to the user's ratings (based on distance to cluster centroids)
+    user_vector = [
+        user_rating.rating for user_rating in user_ratings
+    ]  # Create a vector from user ratings
+    user_cluster = kmeans.predict([user_vector])[0]
+
+    # Find all songs in the same cluster
+    cluster_songs = Song.objects.exclude(rated_by=user.pk).filter(
+        id__in=[i for i, cluster in enumerate(clusters) if cluster == user_cluster]
+    )
+
+    return cluster_songs

@@ -42,6 +42,12 @@ class Song(models.Model):
     liveness = models.DecimalField(
         max_digits=20, decimal_places=10, null=True, blank=True
     )
+    rated_by = models.ManyToManyField(User, blank=True)
+
+    cluster = models.IntegerField(blank=True, null=True)
+
+    img_src = models.CharField(max_length=200, default="", null=True, blank=True)
+    """song_length = models.DecimalField"""
 
     def __str__(self):
         return f"{self.title} by {self.artist_name}"

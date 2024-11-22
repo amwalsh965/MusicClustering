@@ -15,9 +15,9 @@
     {% if current_song_info %}
     <h2 id="song-title">Now Playing: {{ current_song_info.track_name }} by {{ current_song_info.artist_name }}</h2>
 
-    <form method="POST">
+    <form id="form" method="POST">
         {% csrf_token %}
-        <input type="hidden" name="song" value="{{ current_song_info.song.id }}">
+        <input type="hidden" id="song" name="song" value="{{ current_song_info.song.id }}">
 
         <label for="rating">Rate this song:</label>
         <input type="range" name="rating" id="rating" min="1" max="10" step="1" value="5">
@@ -32,7 +32,7 @@
         <input type="hidden" name="song" value="">
 
         <label for="rating">Rate this song:</label>
-        <input type="range" name="rating" id="rating" min="1" max="10" step="1" value="5">
+        <input type="range" name="rating" min="1" max="10" step="1" value="5">
         <span id="ratingValue">5</span>
 
         <button type="submit">Submit Rating</button>
@@ -58,6 +58,7 @@
 
             function fetchSongInfo() {
                 if (RatingInProgress) {
+                    console.log("rating in progress")
                     return; // Exit if the rate function is currently processing
                 }
                 axios.get("/", {
@@ -89,15 +90,19 @@
             setInterval(fetchSongInfo, 5000);
 
 
-            const ratingForm = document.querySelector('form');
+            const ratingForm = document.getElementById('form');
             ratingForm.addEventListener('submit', (event) => {
                 event.preventDefault();
 
                 RatingInProgress = true;
 
-                const formData = new FormData(ratingForm);
-                const data = Object.fromEntries(formData);
-                data.action = 'rate_song'
+                const data = {
+                    song: document.getElementById('song').value,
+                    rating: document.getElementById('rating').value,
+                    action: 'rate_song'
+                };
+
+                console.log(data)
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -105,6 +110,7 @@
 
                 axios.post("/", data)
                     .then(response => {
+                        console.log("sending")
                     })
                     .catch(error => {
                         console.error("Error submitting rating:", error);

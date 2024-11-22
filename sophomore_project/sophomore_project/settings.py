@@ -63,6 +63,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.static",
             ],
         },
     },
@@ -116,7 +117,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -124,7 +128,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SPOTIFY_CLIENT_ID = "9ebda12821374968a234427e407bb6bf"
-SPOTIFY_CLIENT_SECRET = "7d93bd2be64c4273b1e4dcf36d23e30d"
+SPOTIFY_CLIENT_SECRET = "fff16fc33ab2461ea2167bac745b29b8"
 SPOTIFY_REDIRECT_URI = "http://127.0.0.1:8000/spotify/callback/"
 
 LOGIN_URL = "spotify/login/"
