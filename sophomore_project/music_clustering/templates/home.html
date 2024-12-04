@@ -7,17 +7,50 @@
 {% block content %}
 
 <div id="home-grid">
-    <div id="top-recommendations" class="home-grid-item">
+    <div id="top-recommendations" class="home-grid-item recommendation-container-song">
         <h1 class="home-header">Top Recommendations</h1>
-        <table id="home-recommendation-table">
-
-        </table>
+        <div class="home-recommendation-sub-grid">
+            <img class="recommendation-image grid-item" src="{{ song_infos.song1.img_src }}" alt="song1 picture" />
+            <div class="recommendation-text grid-item">
+                <p class="recommendation-text-title grid-item">{{song_infos.song1.title}}</p>
+                <p class="recommendation-text-artist grid-item">{{song_infos.song1.artist_name}}</p>
+            </div>
+        </div>
+        <div class="home-recommendation-sub-grid">
+            <img class="recommendation-image grid-item" src="{{ song_infos.song2.img_src }}" alt="song1 picture" />
+            <div class="recommendation-text grid-item">
+                <p class="recommendation-text-title grid-item">{{song_infos.song2.title}}</p>
+                <p class="recommendation-text-artist grid-item">{{song_infos.song2.artist_name}}</p>
+            </div>
+        </div>
+        <div class="home-recommendation-sub-grid">
+            <img class="recommendation-image grid-item" src="{{ song_infos.song3.img_src }}" alt="song1 picture" />
+            <div class="recommendation-text grid-item">
+                <p class="recommendation-text-title grid-item">{{song_infos.song3.title}}</p>
+                <p class="recommendation-text-artist grid-item">{{song_infos.song3.artist_name}}</p>
+            </div>
+        </div>
+        <div class="home-recommendation-sub-grid">
+            <img class="recommendation-image grid-item" src="{{ song_infos.song4.img_src }}" alt="song1 picture" />
+            <div class="recommendation-text grid-item">
+                <p class="recommendation-text-title grid-item">{{song_infos.song4.title}}</p>
+                <p class="recommendation-text-artist grid-item">{{song_infos.song4.artist_name}}</p>
+            </div>
+        </div>
+        <div class="home-recommendation-sub-grid">
+            <img class="recommendation-image grid-item" src="{{ song_infos.song5.img_src }}" alt="song1 picture" />
+            <div class="recommendation-text grid-item">
+                <p class="recommendation-text-title grid-item">{{song_infos.song5.title}}</p>
+                <p class="recommendation-text-artist grid-item">{{song_infos.song5.artist_name}}</p>
+            </div>
+        </div>
     </div>
-    <div id="top-genres" class="home-grid-item">
-        <h1 class="home-header">Top Genres</h1>
-        <table id="home-genre-table">
 
-        </table>
+    <div id="top-genres" class="home-grid-item recommendation-container-genre">
+        <h1 class="home-header">Top Genres</h1>
+        <div id="top-genres">
+
+        </div>
     </div>
 </div>
 

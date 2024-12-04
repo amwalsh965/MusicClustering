@@ -1,12 +1,18 @@
 /* Global styles */
 body {
     font-family: "Roboto", sans-serif;
-    background-color: black;
+    background-color: #121212;
     color: #1FD860;
     margin: 0;
     padding: 0;
     min-height: 100vh;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: 10px;
 }
 
 .main-title {
@@ -22,7 +28,7 @@ main {
 /* Menu bar styling */
 nav {
     width: 100%;
-    background-color: #333;
+    background-color: #1F1F1F;
     overflow: hidden;
 
 }
@@ -52,31 +58,49 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    background-color: #555;
+    background-color: #1F1F1F;
 }
 
 /* Container for centering the content */
 .container {
     max-width: 1200px;
-    /* Wider max width */
     margin-top: 80px;
-    /* Space for fixed navbar */
     padding: 20px;
-    background-color: #222;
+    background-color: #1F1F1F;
     border-radius: 10px;
     box-shadow: 0px 0px 10px #1FD860;
     width: 90%;
-    /* Ensures it spans almost full width on larger screens */
 }
 
-/* Flexbox layout for image and heading */
+.recommendation-container-song {
+    max-width: 1200px;
+    margin-top: 20px;
+    margin-left: 30px;
+    margin-right: 80px;
+    padding: 20px;
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #1FD860;
+    width: 90%;
+}
+
+.recommendation-container-genre {
+    max-width: 1200px;
+    margin-top: 20px;
+    margin-left: 40px;
+    padding: 20px;
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #1FD860;
+    width: 90%;
+}
+
 .header {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
 }
 
-/* Styles for the image */
 header nav ul img {
     width: 200px;
     height: auto;
@@ -84,14 +108,12 @@ header nav ul img {
     border-radius: 10px;
 }
 
-/* Styling the heading */
 .header h1 {
     font-size: 2rem;
     margin: 0;
     color: #1FD860;
 }
 
-/* Style for the current song info */
 h2 {
     margin-top: 0;
     color: white;
@@ -99,12 +121,11 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Form styling */
 form {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #333;
+    background-color: #1F1F1F;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 5px rgba(0, 255, 0, 0.2);
@@ -128,7 +149,6 @@ input[type="range"] {
     margin-bottom: 10px;
 }
 
-/* Slider thumb */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -139,7 +159,6 @@ input[type="range"]::-webkit-slider-thumb {
     border-radius: 50%;
 }
 
-/* Submit button styling */
 button[type="submit"] {
     background-color: #1FD860;
     color: white;
@@ -162,11 +181,6 @@ button[type="submit"]:active {
     background-color: purple;
 }
 
-footer {
-    position: absolute;
-    bottom: 2%
-}
-
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
@@ -184,7 +198,6 @@ footer {
 
     .container {
         width: 95%;
-        /* Slightly narrower on small screens */
     }
 }
 
@@ -213,11 +226,12 @@ footer {
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
-    width: 100%;
+    width: 85%;
 }
 
 #top-recommendations {
     grid-column: 1 / 2;
+    padding-top: 20px
 }
 
 #top-genres {
@@ -229,4 +243,193 @@ footer {
     justify-content: center;
     text-align: center;
     flex-direction: column;
+}
+
+
+.home-recommendation-sub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 80%;
+    height: 15%;
+    gap: 2%;
+    margin-left: 10%;
+    margin-top: 5%;
+}
+
+.recommendation-image {
+    width: 70%;
+    height: auto;
+    padding: 2% 2%;
+    grid-column: 1 / 2;
+    text-align: right;
+}
+
+.recommendation-text-title {
+    font-weight: 600;
+}
+
+.recommendation-text {
+    text-align: left;
+    font-size: 1.5rem;
+    grid-column: 2 / 3;
+}
+
+/* song_recommendations page */
+
+.genre-container {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 255, 0, 0.2);
+}
+
+.genre-container h2 {
+    margin: 0 0 10px;
+    color: #1FD860;
+    text-align: center;
+}
+
+.genre-slider {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #1FD860 #121212;
+}
+
+.genre-slider::-webkit-scrollbar {
+    height: 8px;
+}
+
+.genre-slider::-webkit-scrollbar-thumb {
+    background-color: #1FD860;
+    border-radius: 5px;
+}
+
+.genre-slider::-webkit-scrollbar-track {
+    background-color: #121212;
+}
+
+.genre-item {
+    cursor: pointer;
+    display: inline-block;
+    flex: 0 0 auto;
+    background-color: #121212;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: background-color 0.3s;
+}
+
+.genre-item:hover {
+    background-color: #1FD860;
+    color: black;
+}
+
+.recommendations-container {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #121212;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 255, 0, 0.2);
+    color: white;
+}
+
+.recommendations-container h3 {
+    text-align: center;
+    color: #1FD860;
+    margin-bottom: 15px;
+}
+
+.recommendations-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.recommendation-item {
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    padding: 15px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.recommendation-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 10px rgba(0, 255, 0, 0.3);
+}
+
+.recommendation-item h4 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #1FD860;
+}
+
+.recommendation-item p {
+    margin: 5px 0 0;
+    font-size: 0.9em;
+    color: #CCCCCC;
+}
+
+.selected-genre {
+    background-color: #1FD860;
+    color: black;
+}
+
+.main-recommendation-container {
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #1FD860;
+    width: 90%;
+}
+
+#recommendation-grid {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.recommendation-sub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 80%;
+    height: 15%;
+    gap: 2%;
+    margin-left: 10%;
+    margin-top: 5%;
+}
+
+#recommendations {
+    padding-top: 20px;
+    grid-column: 1 / 1;
+}
+
+.recommendations-image {
+    width: 80%;
+    height: auto;
+    grid-column: 1 / 2;
+    text-align: right;
+}
+
+.recommendations-text {
+    text-align: left;
+    font-size: 1.5rem;
+    grid-column: 2 / 3;
+}
+
+.recommendations-stats {
+    grid-column: 3 / 4;
 }

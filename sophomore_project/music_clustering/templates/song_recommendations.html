@@ -3,3 +3,110 @@
 {% block title %}Song Recommendations{% endblock %}
 
 {% block header-title %}Song Recommendations{% endblock %}
+
+{% block content %}
+<div id="recommendation-grid">
+    <div id="recommendations" class="main-recommendation-container">
+        <div class="genre-container">
+            <h2>Genres</h2>
+            <div class="genre-slider">
+                {% for genre in genres %}
+                <div class="genre-item" data-genre="{{ genre }}" onclick="showRecommendations('{{ genre }}')">
+                    {{ genre }}
+                </div>
+                {% endfor %}
+            </div>
+            <div id="recommendations-container">
+                <!-- Recommendations will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showRecommendations(genre) {
+        const csrfToken = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content");
+
+        const genreItems = document.querySelectorAll('.genre-item');
+        genreItems.forEach(item => {
+            item.classList.remove('selected-genre');
+        });
+
+        const clickedGenre = document.querySelector(`.genre-item[data-genre="${genre}"]`);
+        if (clickedGenre) {
+            clickedGenre.classList.add('selected-genre');
+        }
+
+        axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
+
+        axios.get(`get_song_recommendations`, { params: { "genre": genre } })
+            .then(response => {
+                const data = response.data;
+                console.log(data);
+
+                const container = document.getElementById('recommendations-container');
+                container.innerHTML = '';
+
+                const title = document.createElement('h3');
+                title.textContent = `Recommendations for ${genre}`;
+                container.appendChild(title);
+
+
+
+                data.recommendations.forEach(song => {
+                    const grid_item = document.createElement('div');
+                    grid_item.className = 'recommendation-sub-grid';
+
+                    const img = document.createElement('img');
+                    img.className = 'recommendations-image grid-item';
+                    img.src = `${song.img}`;
+                    grid_item.appendChild(img)
+
+                    const text_div = document.createElement('div');
+                    text_div.className = 'recommendations-text grid-item';
+
+                    const title_text = document.createElement('p');
+                    title_text.textContent = song.track_name;
+                    title_text.className = 'recommendation-text-title grid-item';
+                    text_div.appendChild(title_text);
+
+                    const artist_text = document.createElement('p');
+                    artist_text.textContent = `by ${song.artist_name}`;
+                    artist_text.className = 'recommendation-text-artist grid-item';
+                    text_div.appendChild(artist_text);
+
+                    grid_item.appendChild(text_div);
+                    container.appendChild(grid_item);
+
+                    const info_div = document.createElement('div');
+                    info_div.className = 'recommendations-stats grid-item';
+
+                    const info_header = document.createElement('h1');
+                    info_header.textContent = "Song Info";
+                    info_div.appendChild(info_header);
+                    const info_list = document.createElement('ul');
+                    for (const [key, value] of Object.entries(song)) {
+                        if (key !== 'img' && key !== 'track_name' && key !== 'artist_name') {
+                            const list_item = document.createElement('li');
+                            if (key == 'genres') {
+                                list_item.textContent = `${key}: ${value}`;
+                            } else {
+                                list_item.textContent = `${key}: ${Math.round(value * 100) / 100}`;
+                            }
+                            info_list.appendChild(list_item);
+                        }
+                    }
+                    info_div.appendChild(info_list);
+                    grid_item.appendChild(info_div);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching recommendations:', error);
+            });
+
+    }
+</script>
+
+{% endblock %}

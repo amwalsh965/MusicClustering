@@ -1,57 +1,34 @@
+# Django/Local imports
+from .models import Song, Rating, User, Genre
+from .view_utils import *
+from django.conf import settings
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+
+# General Imports
 import json
 import time
-from django.forms import model_to_dict
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
-from .models import Song, Rating, User, Genre
-from .forms import RatingForm
-
-import spotipy
 import requests
-from spotipy.oauth2 import SpotifyOAuth
-from django.conf import settings
-
-from django.contrib.auth.decorators import login_required
-
 from itertools import islice
+
+# Spotify API Imports
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 
 def home(request):
-    return render(request, "../templates/home.html")
+    user = User.objects.get(spotify_id=request.session.get("spotify_user_id"))
+    top_genres = get_top_genres_user(user, 5)
+    songs = get_user_recommendations_for_home(user, top_genres, 5)
 
-
-def song_recommendation(request):
-    return render(request, "../templates/song_recommendations.html")
-
-
-def serialize_song(song: Song):
-    return {
-        "track_name": song.title,
-        "artist_name": song.artist_name,
-        "tempo": song.tempo,
-        "valence": song.valence,
-        "genres": [genre.name for genre in song.genres.all()],  # Serialize genres
+    song_infos = {
+        "song1": songs[0],
+        "song2": songs[1],
+        "song3": songs[2],
+        "song4": songs[3],
+        "song5": songs[4],
     }
-
-
-def skip_song(request, access_token):
-    skip_url = "https://api.spotify.com/v1/me/player/next"
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    response = requests.post(skip_url, headers=headers)
-
-    print(response.status_code)
-    if response.status_code == 204 or response.status_code == 200:
-
-        # time.sleep(1)
-
-        current_song_url = "https://api.spotify.com/v1/me/player/currently-playing"
-        song_response = requests.get(current_song_url, headers=headers)
-
-        if song_response.status_code == 200:
-            return song_response.json()
-
-    return None
+    return render(request, "../templates/home.html", {"song_infos": song_infos})
 
 
 def rate_songs(request):
@@ -75,7 +52,7 @@ def rate_songs(request):
         # data = request.POST
         song_id = data.get("song")
         user_rating = data.get("rating")
-
+        print(f"song_id: {song_id}")
         if song_id and user_rating:
             try:
                 song = Song.objects.get(pk=song_id)
@@ -121,11 +98,66 @@ def rate_songs(request):
     )
 
 
+def song_recommendation(request):
+    user = User.objects.get(spotify_id=request.session.get("spotify_user_id"))
+    genres = get_top_genres_user(user, 20)
+    return render(
+        request,
+        "../templates/song_recommendations.html",
+        {
+            "genres": genres,
+        },
+    )
+
+
+def get_song_recommendations(request):
+    user = User.objects.get(spotify_id=request.session.get("spotify_user_id"))
+    genre = request.GET.get("genre")
+    songs = recommend_songs_by_genre(user, genre, 20)
+    recommendations = []
+    for song in songs:
+        recommendations.append(serialize_song(song))
+    return JsonResponse({"recommendations": recommendations})
+
+
+def serialize_song(song: Song):
+    return {
+        "track_name": song.title,
+        "artist_name": song.artist_name,
+        "tempo": song.tempo,
+        "valence": song.valence,
+        "popularity": song.popularity,
+        "danceability": song.danceability,
+        "energy": song.energy,
+        "genres": [genre.name for genre in song.genres.all()],  # Serialize genres
+        "img": song.img_src,
+    }
+
+
+def skip_song(request, access_token):
+    skip_url = "https://api.spotify.com/v1/me/player/next"
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    response = requests.post(skip_url, headers=headers)
+
+    if response.status_code == 204 or response.status_code == 200:
+
+        # time.sleep(1)
+
+        current_song_url = "https://api.spotify.com/v1/me/player/currently-playing"
+        song_response = requests.get(current_song_url, headers=headers)
+
+        if song_response.status_code == 200:
+            return song_response.json()
+
+    return None
+
+
 sp_oauth = SpotifyOAuth(
     client_id=settings.SPOTIFY_CLIENT_ID,
     client_secret=settings.SPOTIFY_CLIENT_SECRET,
     redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-    scope="user-modify-playback-state user-read-currently-playing user-read-playback-state playlist-read-private",
+    scope="user-modify-playback-state user-read-currently-playing user-read-playback-state playlist-read-private user-library-read user-read-private",
 )
 
 
@@ -268,16 +300,21 @@ def add_all_playlist_songs(playlist_id, request):
 def get_features(current_track, request, word, wait_time=0):
     time.sleep(wait_time)
     print(f"sleeping for {wait_time} seconds")
-    input("press")
     access_token = request.session.get("token_info").get("access_token")
-
     token_info = request.session.get("token_info")
 
     if token_info:
         track_id = current_track[str(word)]["id"]
-
         headers = {"Authorization": f"Bearer {access_token}"}
-        print(track_id)
+
+        test_track_id = "0lWjRSzq5chA9fps3pM8Zr"  # Replace with a valid track ID
+        audio_features_url = (
+            f"https://api.spotify.com/v1/audio-features/0lWjRSzq5chA9fps3pM8Zr"
+        )
+        response = requests.get(audio_features_url, headers=headers)
+        print(response.status_code, response.json())
+        print("Headers:", response.headers)
+        print("Body:", response.json())
 
         audio_features_url = f"https://api.spotify.com/v1/audio-features/{track_id}"
         audio_response = requests.get(audio_features_url, headers=headers)
@@ -303,6 +340,7 @@ def get_features(current_track, request, word, wait_time=0):
             track_info_url = f"https://api.spotify.com/v1/tracks/{track_id}"
             track_info_response = requests.get(track_info_url, headers=headers)
 
+            print(track_info_response.status_code)
             if track_info_response.status_code == 429:
                 retry_after = int(audio_response.headers.get("Retry-After", 1))
                 print(f"Rate limited. Retry after {retry_after} seconds.")
@@ -316,6 +354,7 @@ def get_features(current_track, request, word, wait_time=0):
                 artist_info_url = f"https://api.spotify.com/v1/artists/{artist_id}"
                 artist_response = requests.get(artist_info_url, headers=headers)
 
+                print(artist_response.status_code)
                 if artist_response.status_code == 429:
                     retry_after = int(audio_response.headers.get("Retry-After", 1))
                     print(f"Rate limited. Retry after {retry_after} seconds.")
@@ -326,18 +365,18 @@ def get_features(current_track, request, word, wait_time=0):
                     artist_info = artist_response.json()
                     genres = artist_info.get("genres")
 
-                return {
-                    "valence": valence,
-                    "tempo": tempo,
-                    "danceability": danceability,
-                    "energy": energy,
-                    "key": key,
-                    "speechiness": speechiness,
-                    "acousticness": acousticness,
-                    "instrumentalness": instrumentalness,
-                    "liveness": liveness,
-                    "genres": genres,
-                }
+                    return {
+                        "valence": valence,
+                        "tempo": tempo,
+                        "danceability": danceability,
+                        "energy": energy,
+                        "key": key,
+                        "speechiness": speechiness,
+                        "acousticness": acousticness,
+                        "instrumentalness": instrumentalness,
+                        "liveness": liveness,
+                        "genres": genres,
+                    }
 
 
 def chunked_iterable(iterable, size):
@@ -390,7 +429,6 @@ def get_features_batch(tracks, request):
             retry_after = int(audio_response.headers.get("Retry-After", 1))
             print(f"Rate limited. Retrying after {retry_after} seconds.")
             time.sleep(retry_after)
-            input("press")
             continue  # Retry after waiting
 
         if audio_response.status_code != 200:
@@ -414,7 +452,6 @@ def get_features_batch(tracks, request):
             retry_after = int(audio_response.headers.get("Retry-After", 1))
             print(f"Rate limited. Retrying after {retry_after} seconds.")
             time.sleep(retry_after)
-            input("press")
             continue  # Retry after waiting
 
         if track_info_response.status_code != 200:
@@ -442,7 +479,6 @@ def get_features_batch(tracks, request):
             retry_after = int(audio_response.headers.get("Retry-After", 1))
             print(f"Rate limited. Retrying after {retry_after} seconds.")
             time.sleep(retry_after)
-            input("press")
             continue  # Retry after waiting
 
         if artist_response.status_code != 200:
@@ -500,6 +536,17 @@ def get_features_batch(tracks, request):
 
 
 def add_playlist_songs(request):
+
+    playlist_urls = []
+
+    for playlist in playlist_urls:
+        print(f"looking at playlist: {playlist}")
+        track_list = add_all_playlist_songs(playlist, request)
+        print(len(track_list))
+        get_features_batch(track_list, request)
+
+
+def delete_duplicate_songs():
     print("starting")
     songs = Song.objects.all()
     counter = 0
@@ -517,11 +564,55 @@ def add_playlist_songs(request):
                 else:
                     songs = Song.objects.all()
 
-    """playlist_urls = [
-    ]
+    for song in songs:
+        try:
+            Song.objects.get(artist_name=song.artist_name, title=song.title)
+        except Song.MultipleObjectsReturned:
+            id_songs = Song.objects.filter(
+                artist_name=song.artist_name, title=song.title
+            )
+            for song_id in id_songs:
+                if (
+                    Song.objects.filter(
+                        artist_name=song.artist_name, title=song.title
+                    ).count()
+                    > 1
+                ):
+                    song_id.delete()
+                    print("Deleting Duplicate")
+                else:
+                    songs = Song.objects.all()
 
-    for playlist in playlist_urls:
-        print(f"looking at playlist: {playlist}")
-        track_list = add_all_playlist_songs(playlist, request)
-        print(len(track_list))
-        get_features_batch(track_list, request)"""
+
+def update_all_cluster_groups():
+    songs = Song.objects.all()
+    for song in songs:
+        song.cluster = None
+
+
+def precluster_music():
+    top_genres = get_top_genres_general()
+    precluster_songs_by_genre(top_genres)
+
+
+# Makes song clusters for a specific user
+def cluster_user_songs(user):
+    precluster_music()
+
+
+def get_user_recommendations_for_home(user, top_genres, num):
+    song_lists = []
+    for genre in top_genres:
+        song_lists.append(recommend_songs_by_genre(user, genre, num))
+    print(song_lists)
+    songs = []
+    for num, song_list in enumerate(song_lists):
+        if num >= 1:
+            while songs[num - 1] == song_list[0]:
+                song_list.pop(0)
+            songs.append(song_list[0])
+        else:
+            songs.append(song_list[0])
+
+    print(songs)
+    return songs
