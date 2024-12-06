@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <title>{% block title %}Spotify Clustering{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '../static/styles/styles.css' %}">
+    <link rel="icon" href="{% static '../static/images/favicon-32x32.png' %}" type="image/png">
+    <link rel="apple-touch-icon" href="{% static '../static/images/favicon-32x32.png' %}">
+</head>
+
+<body>
+    <header>
+        <!-- nav bar -->
+        <nav>
+            <ul>
+                {% load static %}
+                <img src="{% static '../static/images/Spotifyimg.png' %}" alt=" Spotify banner" />
+                <h1 id='main-title'>{% block header-title %} Title {% endblock %}</h1>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'rate_songs_relog' %}">Rate Song</a></li>
+                <li><a href="{% url 'song_recommendation' %}">Song Recommendations</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- block where main content goes -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>&copy; 2024 Music Clustering</footer>
+</body>
+
+</html>
