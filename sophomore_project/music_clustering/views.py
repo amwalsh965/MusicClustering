@@ -28,7 +28,22 @@ def home(request):
         "song4": songs[3],
         "song5": songs[4],
     }
-    return render(request, "../templates/home.html", {"song_infos": song_infos})
+    genres = {}
+    number_rated = {}
+    for num, genre in enumerate(top_genres):
+        genre: str
+        genres[f"genres{num}"] = genre.capitalize()
+
+        number_rated[f"num{num}"] = Song.objects.filter(
+            genres=Genre.objects.get(name=genre), rated_by=user
+        ).count()
+
+    print(genres)
+    return render(
+        request,
+        "../templates/home.html",
+        {"song_infos": song_infos, "top_genres": genres, "num": number_rated},
+    )
 
 
 def rate_songs(request):
@@ -49,6 +64,7 @@ def rate_songs(request):
     if request.method == "POST":
         # TODO need to disable the submit button when there is no song
         data = json.loads(request.body)
+        print(data)
         # data = request.POST
         song_id = data.get("song")
         user_rating = data.get("rating")
@@ -297,6 +313,7 @@ def add_all_playlist_songs(playlist_id, request):
     return song_ids
 
 
+# Doesn't work anymore because of spotify api's depreciation
 def get_features(current_track, request, word, wait_time=0):
     time.sleep(wait_time)
     print(f"sleeping for {wait_time} seconds")
@@ -306,15 +323,6 @@ def get_features(current_track, request, word, wait_time=0):
     if token_info:
         track_id = current_track[str(word)]["id"]
         headers = {"Authorization": f"Bearer {access_token}"}
-
-        test_track_id = "0lWjRSzq5chA9fps3pM8Zr"  # Replace with a valid track ID
-        audio_features_url = (
-            f"https://api.spotify.com/v1/audio-features/0lWjRSzq5chA9fps3pM8Zr"
-        )
-        response = requests.get(audio_features_url, headers=headers)
-        print(response.status_code, response.json())
-        print("Headers:", response.headers)
-        print("Body:", response.json())
 
         audio_features_url = f"https://api.spotify.com/v1/audio-features/{track_id}"
         audio_response = requests.get(audio_features_url, headers=headers)

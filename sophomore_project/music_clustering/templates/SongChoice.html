@@ -10,7 +10,6 @@
 
   <h1>Rate Your Favorite Songs</h1>
 
-  {% if current_song_info %}
   <img id="song-image" src="{{ current_song_info.img_src }}" alt="{{ current_song_info.img_src }}" />
   <h2 id="song-title">
     Now Playing: {{ current_song_info.track_name }} by {{ current_song_info.artist_name }}
@@ -25,14 +24,6 @@
 
     <button type="submit">Submit Rating</button>
   </form>
-  {% else %}
-  <h2 id="song-title">No song currently playing.</h2>
-  <form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="song" value="" />
-
-  </form>
-  {% endif %}
 </div>
 
 <script>
@@ -100,6 +91,7 @@
 
       axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
 
+      //If doesn't work, put data in instead of rate_song
       axios
         .post("", data, {
           headers: {

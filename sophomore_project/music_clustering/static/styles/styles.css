@@ -433,3 +433,14 @@ button[type="submit"]:active {
 .recommendations-stats {
     grid-column: 3 / 4;
 }
+
+#top-genres-sub-grid {
+    padding-top: 50px;
+    padding-bottom: 80px;
+    width: 100%
+}
+
+.home-genres-header {
+    font-size: 35px;
+    text-align: center;
+}
